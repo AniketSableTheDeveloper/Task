@@ -1,11 +1,12 @@
 const cds = require('@sap/cds');
-var textfile = require('textfile');
+// var textfile = require('textfile');
 const fs = require('fs');
 const path = require('path');
 const lib_file = require('../srv/LIB/lib');
 const { stringify } = require('querystring');
 const { error } = require('console');
 const simpleGit = require('simple-git');
+const axios = require('axios');
 
 module.exports = cds.service.impl(async function () {
             
@@ -31,7 +32,9 @@ module.exports = cds.service.impl(async function () {
             console.log(28);
             const filePath = path.join(__dirname, '..', 'srv', fileName);
             fs.writeFileSync(filePath, content, 'utf8');
-            await lib_file.githubFetch();
+            // await lib_file.githubFetch();
+            const fileContent = fs.readFileSync(filePath);
+            await lib_file.updateGitFile(fileContent);
             return "Text File As Been Created";
             }
         }
@@ -66,4 +69,6 @@ module.exports = cds.service.impl(async function () {
     this.on('gitFunc', async function(req){
         
     });
+    
+
 })

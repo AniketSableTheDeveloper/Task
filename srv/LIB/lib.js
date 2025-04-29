@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const simpleGit = require('simple-git');
-// const lib_file = require('../LIB/lib');
+const axios = require('axios');
+
 
 module.exports ={
         fetchTextData:async function () {
@@ -41,5 +42,55 @@ module.exports ={
           req.error(500, 'Git push failed');
         }
         return 'File updated and pushed to GitHub';
+    },
+  
+
+    updateGitFile: async function (content) {
+      try{
+        console.log(50);
+    require('dotenv').config();
+    const token = ""; // Store token securely in environment
+    console.log(token);
+    const repoOwner = 'AniketSableTheDeveloper';
+    const repoName = 'Task';
+    const path = 'Task/sampleData.json';
+    const branch = 'main';
+    const url = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`;
+    
+    console.log(url);
+
+    let sha;
+    try {
+      // Step 1: Get the SHA of the existing file
+      const getRes = await axios.get(url, {
+        headers: {
+          Authorization: `token ${token}`
+        }
+      });
+      sha = getRes.data.sha;
+    } catch (err) {
+      if (err.response?.status === 404) {
+        console.log("🆕 File does not exist. It will be created.");
+      } else {
+        throw err; // rethrow other errors
+      }
+    }
+    const base64Content = Buffer.from(content).toString('base64');
+        const res = await axios.put(url, {
+        message: 'Update file from deployed CAP app',
+        content: base64Content,
+        branch: branch,
+        ...(sha ? { sha } : {})
+        }, 
+        {
+        headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
+        }
+    });
+    console.log(72);
+    // console.log('File pushed successfully:', res.data);
+    return res.data;
+  }catch(error){return error}
     }
 }
